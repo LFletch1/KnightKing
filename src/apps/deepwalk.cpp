@@ -29,7 +29,11 @@
 template<typename edge_data_t>
 void run(WalkEngine<edge_data_t, EmptyData> *graph, STruncatedRandomWalkOptionHelper *opt)
 {
-    graph->load_graph(opt->v_num, opt->graph_path.c_str(), opt->make_undirected);
+    int rank = get_mpi_rank();
+    if (rank == 0) {
+        std::cout << "Loading graph\n";
+    }
+    graph->load_graph(opt->v_num, opt->graph_path.c_str(), opt->make_undirected, GraphFormat::GF_Edgelist);
     WalkConfig walk_conf;
     if (!opt->output_path.empty())
     {
@@ -39,13 +43,19 @@ void run(WalkEngine<edge_data_t, EmptyData> *graph, STruncatedRandomWalkOptionHe
     {
         walk_conf.set_walk_rate(opt->rate);
     }
+    if (rank == 0) {
+        std::cout << "Beginning Walks\n";
+    }
     deepwalk(graph, opt->walker_num, opt->walk_length, &walk_conf);
 }
 
 int main(int argc, char** argv)
 {
     MPI_Instance mpi_instance(&argc, &argv);
-
+    int rank = get_mpi_rank();
+    if (rank == 0) {
+        std::cout << "Beginning Program\n";
+    }
     STruncatedRandomWalkOptionHelper opt;
     opt.parse(argc, argv);
 

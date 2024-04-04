@@ -449,14 +449,47 @@ public:
         {
             local_vertex_degree[read_edges[e_i].src]++;
         }
-        MPI_Allreduce(local_vertex_degree.data(),  vertex_out_degree, v_num, get_mpi_data_type<vertex_id_t>(), MPI_SUM, MPI_COMM_WORLD);
+
+        if (local_partition_id == 0) {
+            std::cout << "At MPI_Allreduce calls\n";
+        }
+        if (v_num > INT32_MAX) {
+            if (local_partition_id == 0) {
+                std::cout << "Need to split up MPI_Allreduce\n";
+            }
+            int amount1 = v_num / 2;
+            int amount2 = (v_num / 2) + (v_num % 2 == 1);
+            if (amount1 + amount2 != v_num) {
+                exit(0);
+            }
+            MPI_Allreduce(local_vertex_degree.data(),  vertex_out_degree, amount1, get_mpi_data_type<vertex_id_t>(), MPI_SUM, MPI_COMM_WORLD);
+
+            MPI_Allreduce(local_vertex_degree.data() + amount1,  vertex_out_degree + amount1, amount2, get_mpi_data_type<vertex_id_t>(), MPI_SUM, MPI_COMM_WORLD);
+        } else {
+            MPI_Allreduce(local_vertex_degree.data(),  vertex_out_degree, v_num, get_mpi_data_type<vertex_id_t>(), MPI_SUM, MPI_COMM_WORLD);
+        }
 
         std::fill(local_vertex_degree.begin(), local_vertex_degree.end(), 0);
         for (edge_id_t e_i = 0; e_i < read_e_num; e_i++) 
         {
             local_vertex_degree[read_edges[e_i].dst] ++;
         }
-        MPI_Allreduce(local_vertex_degree.data(),  vertex_in_degree, v_num, get_mpi_data_type<vertex_id_t>(), MPI_SUM, MPI_COMM_WORLD);
+
+        if (v_num > INT32_MAX) {
+            int amount1 = v_num / 2;
+            int amount2 = (v_num / 2) + (v_num % 2 == 1);
+            if (amount1 + amount2 != v_num) {
+                exit(0);
+            }
+            MPI_Allreduce(local_vertex_degree.data(),  vertex_in_degree, amount1, get_mpi_data_type<vertex_id_t>(), MPI_SUM, MPI_COMM_WORLD);
+
+            MPI_Allreduce(local_vertex_degree.data() + amount1,  vertex_in_degree + amount1, amount2, get_mpi_data_type<vertex_id_t>(), MPI_SUM, MPI_COMM_WORLD);
+        } else {
+            MPI_Allreduce(local_vertex_degree.data(),  vertex_in_degree, v_num, get_mpi_data_type<vertex_id_t>(), MPI_SUM, MPI_COMM_WORLD);
+        }
+
+
+        // MPI_Allreduce(local_vertex_degree.data(),  vertex_in_degree, v_num, get_mpi_data_type<vertex_id_t>(), MPI_SUM, MPI_COMM_WORLD);
 
         vertex_partition_begin = new vertex_id_t[partition_num];
         vertex_partition_end = new vertex_id_t[partition_num];
