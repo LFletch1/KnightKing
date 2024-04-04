@@ -488,8 +488,9 @@ public:
             MPI_Allreduce(local_vertex_degree.data(),  vertex_in_degree, v_num, get_mpi_data_type<vertex_id_t>(), MPI_SUM, MPI_COMM_WORLD);
         }
 
-
-        // MPI_Allreduce(local_vertex_degree.data(),  vertex_in_degree, v_num, get_mpi_data_type<vertex_id_t>(), MPI_SUM, MPI_COMM_WORLD);
+        if (local_partition_id == 0) {
+            std::cout << "Finished MPI_Allreduce";
+        }
 
         vertex_partition_begin = new vertex_id_t[partition_num];
         vertex_partition_end = new vertex_id_t[partition_num];
