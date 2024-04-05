@@ -50,8 +50,10 @@ void run(WalkEngine<edge_data_t, EmptyData> *graph, STruncatedRandomWalkOptionHe
 }
 
 int main(int argc, char** argv)
-{
+{ 
+    std::cout << "Starting\n";
     MPI_Instance mpi_instance(&argc, &argv);
+
     int rank = get_mpi_rank();
     if (rank == 0) {
         std::cout << "Beginning Program\n";

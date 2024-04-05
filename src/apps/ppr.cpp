@@ -47,7 +47,7 @@ public:
 template<typename edge_data_t>
 void run(WalkEngine<edge_data_t, EmptyData> *graph, PPROptionHelper *opt)
 {
-    graph->load_graph(opt->v_num, opt->graph_path.c_str(), opt->make_undirected);
+    graph->load_graph(opt->v_num, opt->graph_path.c_str(), opt->make_undirected, GraphFormat::GF_Edgelist);
     WalkConfig walk_conf;
     if (!opt->output_path.empty())
     {
